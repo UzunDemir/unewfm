@@ -17,7 +17,7 @@ class RadioStream {
     // Локальные файлы
     const localTracks = [
       {
-        path: '/tracks/track1.mp3',
+        path: 'https://musify.club/track/pl/110489/c-c-catch-one-night-is-not-enough.mp3',
         title: 'Unknown',
         artist: 'Unknown',
         duration: 180
