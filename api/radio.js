@@ -27,6 +27,43 @@ const initialPlaylist = [
 // Устанавливаем начальный плейлист
 radioState.playlist = initialPlaylist;
 
+function getCurrentSongInfo() {
+  const now = Date.now();
+  const currentSong = radioState.playlist[radioState.currentSongIndex];
+  
+  if (!currentSong) {
+    return { error: 'No songs in playlist' };
+  }
+
+  // Рассчитываем прогресс
+  const progress = (now - radioState.startTime) / 1000; // в секундах
+  const progressPercent = Math.min(100, (progress / currentSong.duration) * 100);
+  
+  // Проверяем是否需要 перейти к следующей песне
+  if (progress >= currentSong.duration) {
+    radioState.currentSongIndex = (radioState.currentSongIndex + 1) % radioState.playlist.length;
+    radioState.startTime = now;
+    
+    // Обновляем текущую песню после перехода
+    const newCurrentSong = radioState.playlist[radioState.currentSongIndex];
+    return {
+      currentSong: newCurrentSong,
+      progress: 0,
+      progressPercent: 0,
+      songIndex: radioState.currentSongIndex,
+      timeRemaining: newCurrentSong.duration
+    };
+  }
+
+  return {
+    currentSong: currentSong,
+    progress: Math.floor(progress),
+    progressPercent: Math.floor(progressPercent),
+    songIndex: radioState.currentSongIndex,
+    timeRemaining: Math.floor(currentSong.duration - progress)
+  };
+}
+
 export default function handler(req, res) {
   // Разрешаем CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -38,46 +75,20 @@ export default function handler(req, res) {
     return res.status(200).end();
   }
 
-  if (req.method === 'GET') {
-    const now = Date.now();
-    const currentSong = radioState.playlist[radioState.currentSongIndex];
-    
-    if (!currentSong) {
-      return res.json({ error: 'No songs in playlist' });
-    }
-
-    // Рассчитываем прогресс
-    const progress = (now - radioState.startTime) / 1000; // в секундах
-    const progressPercent = Math.min(100, (progress / currentSong.duration) * 100);
-    
-    // Проверяем是否需要 перейти к следующей песне
-    if (progress >= currentSong.duration) {
-      radioState.currentSongIndex = (radioState.currentSongIndex + 1) % radioState.playlist.length;
-      radioState.startTime = now;
-      
-      // Обновляем текущую песню после перехода
-      const newCurrentSong = radioState.playlist[radioState.currentSongIndex];
-      const newProgress = 0;
-      
-      return res.json({
-        currentSong: newCurrentSong,
-        progress: newProgress,
-        progressPercent: 0,
-        songIndex: radioState.currentSongIndex,
-        timeRemaining: newCurrentSong.duration
-      });
-    }
-
-    res.json({
-      currentSong: currentSong,
-      progress: Math.floor(progress),
-      progressPercent: Math.floor(progressPercent),
-      songIndex: radioState.currentSongIndex,
-      timeRemaining: Math.floor(currentSong.duration - progress)
-    });
+  // Обработка разных маршрутов
+  const { pathname } = new URL(req.url, `http://${req.headers.host}`);
+  
+  if (pathname === '/api/nowplaying' && req.method === 'GET') {
+    const data = getCurrentSongInfo();
+    return res.json(data);
   }
 
-  if (req.method === 'POST') {
+  if (pathname === '/api/radio' && req.method === 'GET') {
+    const data = getCurrentSongInfo();
+    return res.json(data);
+  }
+
+  if (pathname === '/api/radio' && req.method === 'POST') {
     // Обновление состояния из бота
     const { playlist, currentSongIndex, startTime } = req.body;
     
@@ -85,10 +96,13 @@ export default function handler(req, res) {
     if (currentSongIndex !== undefined) radioState.currentSongIndex = currentSongIndex;
     if (startTime) radioState.startTime = startTime;
     
-    res.json({ 
+    return res.json({ 
       status: 'success', 
       message: 'Radio state updated',
       state: radioState 
     });
   }
+
+  // Если маршрут не найден
+  res.status(404).json({ error: 'Endpoint not found' });
 }
