@@ -1,0 +1,12 @@
+{
+  "name": "stream-radio",
+  "version": "1.0.0",
+  "description": "Streaming radio with ID3 tags",
+  "type": "module",
+  "dependencies": {
+    "node-id3": "^0.2.6"
+  },
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}
