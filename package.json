@@ -1,12 +1,16 @@
 {
-  "name": "stream-radio",
+  "name": "musical-radio-vercel",
   "version": "1.0.0",
-  "description": "Streaming radio with ID3 tags",
-  "type": "module",
-  "dependencies": {
-    "node-id3": "^0.2.6"
-  },
+  "description": "Radio stream service for Telegram music bot",
+  "main": "index.js",
   "scripts": {
-    "dev": "vercel dev"
+    "dev": "vercel dev",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@vercel/node": "^2.0.0"
+  },
+  "devDependencies": {
+    "vercel": "^28.0.0"
   }
 }
