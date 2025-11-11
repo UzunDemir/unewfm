@@ -4,7 +4,7 @@ let playlist = [
     title: "Summer Vibes",
     artist: "Ocean Waves", 
     duration: 180,
-    url: "/tracks/track1.mp3",
+    url: "https://musify.club/track/pl/110489/c-c-catch-one-night-is-not-enough.mp3",
     type: "local"
   },
   {
